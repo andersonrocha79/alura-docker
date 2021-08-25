@@ -1,0 +1,229 @@
+DOCKER
+
+// inicia um novo container, baixando caso não exista
+docker run hello-world
+docker run ubuntu
+
+// demonstra os containers em execução
+docker ps
+
+// demonstra todos os containers, inclusive os 'parados'
+docker ps -a
+
+// inicia o container e executa um comando
+docker run ubuntu echo "ola mundo"
+
+// inicia o container e já inicia o terminal
+docker run -it ubuntu
+
+// finaliza o container
+control + d
+
+// inicia um container já baixado > ? id do container
+docker start ?
+
+// para o container > id do container
+docker stop ? 
+
+// inicia o container e já executa o terminal
+docker start -a -i ?
+
+// executa o container e já executa o terminal do ubuntu
+docker run -it ubuntu
+
+// exclui todos os containers 
+docker container prune
+
+// exclui uma imagem
+docker rmi hello-world
+
+// para visualizar as imagens
+docker images
+
+// executa o container, baixando se não existir
+// após executar, libera o terminal e cria portas aleatórias para as portas internas do container
+docker run -d -P dockersamples/static-site
+
+// executa especificando o mapeamento de portas (a porta 123456 do meu computador irá apontar para a porta 80 do container(
+docker run -d -p 123456:80 dockersamples/static-site 
+
+// para visualizar as portas do container (? é o id)
+docker port ?
+
+// executando um container e definindo um nome amigável
+docker run -d -P --name meu-container dockersamples/static-site
+
+// executando um container e definindo um nome amigável e enviando variáveis de ambiente
+docker run -d -P --name meu-container -e AUTHOR="Anderson Rocha" dockersamples/static-site
+
+// para os containers em execução
+docker stop -t 0 $(docker ps -q)
+
+// lista os diretórios
+ls
+
+// executa o container informando que tudo que for gerado na pasta '/var/www' seja gravado na máquina local na pasta 'c:\volumes-docker'
+docker run -it -v "c:\volumes-docker:/var/www" ubuntu
+teste:
+cd var/www/
+touch novo-arquivo.txt
+echo "este arquivo foi criado dentro de um volume" > novo-arquivo.txt
+
+// executa uma máquina com node
+// define que a porta 8080 da máquina local irá apontar para a porta 3000 do container
+// define que o conteúdo da minha pasta local 'exemplo-node' será visivel no container no caminho '/var/www'
+// posiciona na pasta '/var/www'
+// executa o comando node npm start para executar a aplicação
+// para testar http://localhost:8080/
+docker run -d -p 8080:3000 -v "C:\teste-docker\exemplo-node:/var/www" -w "/var/www" node npm start
+
+// inspecionar os mapeamentos de volumes do container
+docker inspect ?
+
+// cria um arquivo
+touch ola-mundo.txt
+
+// escreve no arquivo
+echo "teste do container" > ola-mundo.txt
+
+// mostra o conteúdo do arquivo
+cat ola-mundo.txt
+
+// arquivo Dockerfile para geração do container
+FROM node:latest                # cria o container utilizando como base o container node
+COPY . /var/www                 # copia todos os arquivos da pasta local para a pasta /var/www
+WORKDIR /var/www            	# posiciona na pasta /var/www para execução dos comandos
+RUN npm install                 # executa o npm install para baixar as dependências    
+ENTRYPOINT npm start        	# executa o npm start para executar o projeto node
+EXPOSE 3000                     # expoe a porta 3000 do projeto node           
+
+// build para geração da imagem
+docker build . -t andersonrocha79/node
+
+// executando o container
+docker run -d -p 8080:3000 andersonrocha79/node
+
+// enviando imagem para o DataHub
+docker login
+docker push andersonrocha79/node
+
+// para baixar a imagem
+docker pull andersonrocha79/node
+
+// pegando o ip do container
+hostname -i
+
+// instalando o ping no container
+apt-get update && apt-get install -y iputils-ping
+
+// ao rodar os containers todos ficam na mesma rede virtual e se comunicam
+// criando uma rede particular
+docker network create --driver bridge minha-rede
+
+// listando as redes
+docker network ls
+
+// iniciando um container com nome e rede particular definida
+docker run -it --name meu-container-ubuntu --network minha-rede ubuntu
+
+// iniciando o container node da alura
+docker run -d -p 8080:3000 --name meu-node --network minha-rede douglasq/alura-books:cap05
+
+// iniciando a aplicação do banco de dados monbodb
+docker run -d --name meu-mongo --network minha-rede mongo
+
+// para visualizar as aplicações na mesma rede
+docker network inspect minha-rede
+
+// executou esta rota para preencher o banco
+http://localhost:8080/seed
+
+// executando o projeto
+http://localhost:8080
+
+// build para gerar as imagens definidas no arquivo 'docker-compose.yml'
+docker-compose build
+
+// levanta os serviços, redes e componentes descritos no arquivo 'docker-compose.yml'
+docker-compose up
+
+// comando para executar a aplicação exemplo
+http://localhost
+
+// rota para criar os registros no banco
+http://localhost/seed
+
+// outra forma de levantar os serviços do arquivo docker-compose.yml, sem mostrar o log e liberando o terminal
+docker-compose up -d
+
+// visualizar os containers rodando
+docker-compose ps
+
+// para os serviços
+docker-compose down
+
+// ping para teste
+docker exec -it alura-books-1 ping alura-books-2
+
+// retorna diversas informações sobre o container.
+docker inspect ID_CONTAINER 
+
+
+
+RESUMO
+
+Comandos relacionados às informações
+
+docker version 				- exibe a versão do docker que está instalada.
+docker inspect ID_CONTAINER 		- retorna diversas informações sobre o container.
+docker ps 				- exibe todos os containers em execução no momento.
+docker ps -a 				- exibe todos os containers, independentemente de estarem em execução ou não.
+
+Comandos relacionados à execução
+
+docker run NOME_DA_IMAGEM 		- cria um container com a respectiva imagem passada como parâmetro.
+docker run -it NOME_DA_IMAGEM 		- conecta o terminal que estamos utilizando com o do container.
+docker run -d -P --name NOME dockersamples/static-site 
+					- ao executar, dá um nome ao container e define uma porta aleatória.
+docker run -d -p 12345:80 dockersamples/static-site 
+					- define uma porta específica para ser atribuída à porta 80 do container, neste caso 12345.
+docker run -v "CAMINHO_VOLUME" NOME_DA_IMAGEM 
+					- cria um volume no respectivo caminho do container.
+docker run -it --name NOME_CONTAINER --network NOME_DA_REDE NOME_IMAGEM 
+					- cria um container especificando seu nome e qual rede deverá ser usada.
+
+Comandos relacionados à inicialização/interrupção
+
+docker start ID_CONTAINER 		- inicia o container com id em questão.
+docker start -a -i ID_CONTAINER 	- inicia o container com id em questão e integra os terminais, além de permitir interação entre ambos.
+docker stop ID_CONTAINER 		- interrompe o container com id em questão.
+
+Comandos relacionados à remoção
+
+docker rm ID_CONTAINER 			- remove o container com id em questão.
+docker container prune 			- remove todos os containers que estão parados.
+docker rmi NOME_DA_IMAGEM 		- remove a imagem passada como parâmetro.
+Comandos relacionados à construção de Dockerfile
+docker build -f Dockerfile 		- cria uma imagem a partir de um Dockerfile.
+docker build -f Dockerfile -t NOME_USUARIO/NOME_IMAGEM 
+					- constrói e nomeia uma imagem não-oficial.
+docker build -f Dockerfile -t NOME_USUARIO/NOME_IMAGEM CAMINHO_DOCKERFILE 
+					- constrói e nomeia uma imagem não-oficial informando o caminho para o Dockerfile.
+
+Comandos relacionados ao Docker Hub
+
+docker login - inicia o processo de login no Docker Hub.
+docker push NOME_USUARIO/NOME_IMAGEM 	- envia a imagem criada para o Docker Hub.
+docker pull NOME_USUARIO/NOME_IMAGEM 	- baixa a imagem desejada do Docker Hub.
+
+Comandos relacionados à rede
+
+hostname -i 				- mostra o ip atribuído ao container pelo docker (funciona apenas dentro do container).
+docker network create --driver bridge NOME_DA_REDE 
+					- cria uma rede especificando o driver desejado.
+
+Comandos relacionados ao docker-compose
+
+docker-compose build 			- Realiza o build dos serviços relacionados ao arquivo docker-compose.yml, assim como verifica a sua sintaxe.
+docker-compose up 			- Sobe todos os containers relacionados ao docker-compose, desde que o build já tenha sido executado.
+docker-compose down 			- Para todos os serviços em execução que estejam relacionados ao arquivo docker-compose.yml.
